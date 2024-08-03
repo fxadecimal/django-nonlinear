@@ -7,16 +7,33 @@
 
 
 Overview
---------
+========
 
-Typically I use [TODO.md](https://github.com/todomd/todo.md) as my product management method. After working on ~5 person project with non-technical people, I needed a light-weight PM tool to add to an existing django project that wasn't Jira. On larger projects I'd recommend a more comprehensive tool.
+[Django-Nonlinear](https://github.com/fxadecimal/django-nonlinear) is inspired by [linear.app](https://linear.app).
 
-Tries it's best to get out of your way so you can focus on building the product & not managing the tool.
+
+Nonlinear tries it's best to get out of your way so you can focus on building the product & not managing the tool.
+
+It has 2 main use-cases:
+
+- Small or low-cost projects
+- Privacy or Regulatory compliance
+
+
+Features
+========
+
+
+- Git branch name generator e.g. `workspace-1_create-gpt-5`
+- Draggable task list (Sortable / HTMX)
+- Multiple Workspaces supported
+- Markdown Support
+- Task Exporter Command: `./manage.py nonlinear_dump workspace_slug`
 
 
 
 Quick Start: Run Sample Project
-------------------------------
+===============================
 
 
 ```sh
@@ -29,6 +46,8 @@ source .venv/bin/activate
 
 # install dependencies
 pip install -r requirements.txt
+# install nonlinear package
+pip install ../
 
 # Run test server
 ./manage.py migrate --noinput
@@ -42,7 +61,7 @@ Create a new workspace & add yourself:
 
 
 Quick Start: Add to an existing Project:
-----------------------------------------
+========================================
 
 ```sh
 # using your python environment
@@ -86,24 +105,13 @@ Migrate Nonlinear:
 
 
 Quickstart: Docker-compose
---------------------------
+==========================
 
 ```sh
 docker-compose up --build
 docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py createsuperuser
 ```
-
-
-Features
-========
-
-
-- Git branch name generator e.g. `workspace-1_create-gpt-5`
-- Draggable task list (Sortable / HTMX)
-- Multiple Workspaces supported
-- Markdown Support
-- Task Exporter Command: `./manage.py nonlinear_dump workspace_slug`
 
 
 Planned Features
@@ -114,7 +122,7 @@ Planned Features
 - Project View
 - Calendar View
 - User Centric Lists
-- DRF API
+- Rest API
 
 
 References
