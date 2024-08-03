@@ -18,3 +18,4 @@ staticfiles/
 .ignore/
 tasks.json
 TODO.md
+build/

@@ -1,18 +1,16 @@
 from django.conf import settings
 from django.core.management import BaseCommand
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 from django.core.management.base import CommandParser
-from model_bakery import baker
 from pprint import pprint
 import json
 from django.core import serializers
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 from nonlinear.models import (
     Task,
     Workspace,
-    Project,
 )
 
 from nonlinear.export_import import serialize_workspace

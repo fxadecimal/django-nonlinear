@@ -4,6 +4,10 @@ from django.core import serializers
 from nonlinear.models import TaskComment, TaskActivity, Task
 
 
+def _serialize_deserialize(objects):
+    # work around: serialize, deserialize
+    return json.loads(serializers.serialize("json", objects))
+
 def serialize_workspace(
     workspace, exclude_deleted=False, include_comments=True, include_activities=True
 ):
@@ -20,27 +24,21 @@ def serialize_workspace(
         activities = activities.filter(is_deleted=False)
         tasks = tasks.filter(is_deleted=False)
 
-    # work around: serialize, deserialize, then use json lib to reserialize
-    workspace_serialized = serializers.serialize("json", [workspace])
-    tasks_serialized = serializers.serialize("json", tasks)
-    comments_serialized = serializers.serialize("json", comments.all())
-    activites_serialized = serializers.serialize("json", activities.all())
-
-    _tasks = json.loads(tasks_serialized)
-    _workspace = json.loads(workspace_serialized)
-    _comments = json.loads(comments_serialized)
-    _activites = json.loads(activites_serialized)
+    workspace_list = _serialize_deserialize([workspace])
+    tasks_list = _serialize_deserialize(tasks) 
 
     # combine
     output = [
-        *_workspace,
-        *_tasks,
+        *workspace_list,
+        *tasks_list,
     ]
 
     if include_comments:
-        output.extend(_comments)
+        comments_list = _serialize_deserialize(comments.all()) 
+        output.extend(comments_list)
 
     if include_activities:
-        output.extend(_activites)
+        activities_list = _serialize_deserialize(activities.all()) 
+        output.extend(activities_list)
 
     return output
