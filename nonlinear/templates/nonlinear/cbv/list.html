@@ -1,0 +1,13 @@
+{% extends 'nonlinear/base.html' %}
+
+
+{% block main_content %}
+
+{% for obj in object_list %}
+<article>
+<h2><a href="{{ obj.get_absolute_url }}">{{ obj }}</a></h2>
+</article>
+{% endfor %}
+
+
+{% endblock %}

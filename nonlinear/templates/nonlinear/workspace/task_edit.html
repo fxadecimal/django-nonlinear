@@ -1,0 +1,73 @@
+{% extends "nonlinear/base.html" %}
+{% load crispy_forms_tags %}
+{% load markdownify %}
+
+{% block title %}Edit Task: {{task.workspace_slug}}: {{task.name}}{% endblock title %}
+
+{% block header %}
+<header>
+  <article>
+    <h1 style="font-size:1.5rem">Task: {{task.workspace_slug}}: {{task.name}}</h1>
+    <div class="d-flex justify-content-between">
+      <p data-tooltip="{{task.created_at}}">{{task.created_at|timesince}} ago</p>
+      <p>By: {{task.created_by}}</p>
+    </div>
+
+    <!-- task.is_deleted: {{task.is_deleted}} -->
+    <!-- task.is_archived: {{task.is_archived}} -->
+    <!-- task.version: {{task.version}} -->
+
+  </article>
+  <form method="post">
+    <fieldset role="group">
+      <a role="button" class="outline" href="{% url 'nonlinear-workspace-view' workspace_pk=task.workspace.id %}">
+        Back</a>
+
+        <input type="submit" value="Save" />
+    </fieldset>
+</header>
+
+{% endblock header %}
+
+
+{% block main %}
+<main>
+
+  {% csrf_token %}
+  <div class="row justify-content-around">
+
+    <!-- left -->
+    <div class="col-lg-5">
+      <article>
+        {{form.name|as_crispy_field}}
+        {{form.stage|as_crispy_field}}
+        {{form.priority|as_crispy_field}}
+        {{form.tags_csv|as_crispy_field}}
+
+        {{form.story_points|as_crispy_field}}
+        {{form.assigned_to|as_crispy_field}}
+
+        {{form.starts_at|as_crispy_field}}
+        {{form.due_at|as_crispy_field}}
+
+        {{form.started_at|as_crispy_field}}
+        {{form.ended_at|as_crispy_field}}
+
+      </article>
+    </div>
+
+    <!-- middle -->
+    <div class="col-lg-7">
+      <article>
+        {{form.description|as_crispy_field}}
+      </article>
+      </form>
+
+      <fieldset role="group">
+        <a role="button" href="{% url 'nonlinear-task-delete' pk=task.id %}" data-tooltip="Delete Task" class="secondary">Delete</a>
+      </fieldset>
+
+    </div>
+  </div>
+</main>
+{% endblock main %}

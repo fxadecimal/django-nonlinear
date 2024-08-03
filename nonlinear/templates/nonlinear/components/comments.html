@@ -1,0 +1,30 @@
+<section id="comments">
+    <h5>Comments</h5>
+
+
+    {% for comment in task.comments.all %}
+    <article>
+      <div style="width: 100%;display:flex;flex-direction: row-reverse;">
+        <a href="#" data-tooltip="Delete Comment"><i class="bi bi-x-circle"></i></a>
+      </div>
+      <div class="markdown-output pb-2" >
+        {{comment.description|markdownify}}
+      </div>
+      <div class="d-flex justify-content-between">
+        <p data-tooltip="{{comment.created_at}}">{{comment.created_at|timesince}} ago</p>
+        <p>{{comment.created_by}}</p>
+      </div>
+    </article>
+    {% endfor %}
+
+    <!-- Comments Box -->
+    <article>
+      <form method="post" action="{% url 'nonlinear-comment-create' pk=task.id %}" id="comment_form">
+        {% csrf_token %}
+        <textarea name="description" placeholder="Add a comment.."></textarea>
+        <input type="submit" value="Add Comment" class="outline" />
+      </form>
+    </article>
+    <!-- End of Comments Box -->
+
+  </section>

@@ -1,0 +1,33 @@
+{% if task.parent_task is None %}
+<section id="sub-tasks">
+  <h5>Sub-Tasks</h5>
+
+  <div class="sortable">
+    {% for subtask in task.sub_tasks.all %}
+    <article class="row">
+      <div class="col">
+        {{subtask.name}}
+      </div>
+      <div class="col-auto">
+        <span style="
+          border-radius: 10px;
+        " class="p-2 stage stage-{{task.stage}}">{{subtask.get_stage_display}}</span>
+      </div>
+      <div class="col-auto">
+        <a href="/nonlinear/task/{{subtask.id}}/edit" role="button" class="p-0 m-0 outline" style="border: 0"><i
+            class="bi bi-pencil-square"></i> Edit</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <article id="add-sub-task">
+    <form method="post" action="{% url 'nonlinear-subtask-create' pk=task.id %}" id="subtask_form">
+      {% csrf_token %}
+      <input type="text" name="name" placeholder="Sub-task name">
+      <input type="submit" value="Add sub-task" class="outline" />
+    </form>
+  </article>
+
+</section>
+{% endif %}

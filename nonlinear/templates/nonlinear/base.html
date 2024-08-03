@@ -1,0 +1,211 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+
+<head>
+  {% block head %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <title>{% block title %}{%endblock title%}</title>
+
+
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{% static 'css/pico.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pico.classless.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/bootstrap-grid.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/easymde.min.css' %}" />
+
+  <style>
+        .left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      /* width: 12rem; */
+      width: 25vw;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    .right {
+      overflow-x: hidden;
+      /* margin-left: 12rem; */
+      margin-left: 25vw;
+      padding: 10px;
+      min-height: 100vh !important;
+    }
+
+    .draggable {
+      cursor: move;
+    }
+
+    main {
+      min-height: 90vh !important;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .stage-backlog {
+      background-color: lightblue;
+    }
+
+    .stage-done {
+      background-color: lightgray;
+    }
+
+    .stage-in_progress {
+      background-color: lightcoral;
+    }
+
+    .stage-todo {
+      background-color: lightgreen;
+    }
+
+    .stage-archived {
+      background-color: antiquewhite;
+    }
+
+    .stage {
+      color: black;
+    }
+
+    /* div[role="toolbar"]{
+        filter: invert(1)!important;
+      } */
+    .prevent-select {
+      -webkit-user-select: none;
+      /* Safari */
+      -ms-user-select: none;
+      /* IE 10 and IE 11 */
+      user-select: none;
+      /* Standard syntax */
+    }
+
+    .EasyMDEContainer {
+      background-color: var(--pico-background-color) !important;
+    }
+
+    .CodeMirror,
+    .editor-preview {
+      color: var(--pico-color) !important;
+      background-color: var(--pico-background-color) !important;
+    }
+
+    .cm-s-easymde .CodeMirror-cursor {
+      /* border-color: $gray-600 !important; */
+      border-color: var(--pico-color) !important;
+    }
+
+    .editor-toolbar button i {
+      color: var(--pico-color) !important;
+    }
+
+    .editor-toolbar button.active,
+    .editor-toolbar button:hover {
+      background-color: var(--pico-background-color) !important;
+    }
+
+    .editor-preview pre {
+      background-color: var(--pico-background-color) !important;
+    }
+
+    .form-label {
+      font-weight: bold;
+    }
+    article.task {
+      font-weight: bold;
+      border: 1px solid var(--pico-muted-border-color);
+    }
+    .sortable-highlight{
+      background-color: var(--pico-muted-border-color);
+    }
+  </style>
+
+  {% endblock head %}
+</head>
+
+<body>
+  {% block body %}
+  {% block header %}
+  {% endblock header %} 
+  
+  {% block main %}
+  <main style="min-height: 90vh!important;">
+    {% block main_content %}
+    <article>
+      {% block content %}
+      <p>nonlinear/base.html</p>
+      {% endblock content %}
+    </article>
+    {% endblock main_content %}
+  </main>
+  {% endblock main %}
+
+  {% block footer %}
+  <footer class="text-center">
+    {% block footer_content %}
+    <hr>
+    <p><a href="#">NonLinear</a> PM Tool. MIT Licensed 2024. Build in Ericeria, PT with ❤️. By <a href="#">Neil</a></p>
+    {% endblock footer_content %}
+  </footer>
+  {% endblock footer %}
+  {% endblock body %}
+
+  {% block javascript_content %}
+
+  <script src="{% static 'js/htmx.min.js' %}"></script>
+  <script src="{% static 'js/easymde.min.js' %}"></script>
+  <script src="{% static 'js/Sortable.min.js' %}"></script>
+
+  <script defer>
+    document.addEventListener("DOMContentLoaded", function () {
+      Array.from(document.getElementsByTagName("textarea")).forEach(function (element) {
+        var editor = new EasyMDE({
+          element: element,
+          toolbar: false,
+          placeholder: "Markdown here.. ",
+          spellChecker: false,
+          //uploadImage: true,
+        });
+      });
+
+      htmx.onLoad(function (e) {
+        // polling = setInterval(function () { console.log("hello") }, 5000);
+        var elements = document.querySelectorAll(".sortable");
+        Array.from(elements).forEach(function (element) {
+          var sortableInstance = new Sortable(element, {
+            animation: 250,
+            filter: ".htmx-indicator",
+            swapClass: "sortable-highlight",
+
+            selectedClass: 'sortable-highlight',
+            multiDrag: true,
+            fallbackTolerance: 3,
+
+            onMove: function (evt) {
+              return evt.related.className.indexOf("htmx-indicator") === -1;
+            },
+
+            onStart: function (evt) {
+              // clearInterval(polling);
+              console.log("onStart")
+            },
+            onEnd: function (evt) {
+              console.log("onEnd")
+            },
+          });
+          element.addEventListener("htmx:afterSwap", function () {
+            sortableInstance.option("disabled", false);
+          });
+        });
+      });
+    });
+  </script>
+  {% endblock javascript_content %}
+</body>
+
+</html>

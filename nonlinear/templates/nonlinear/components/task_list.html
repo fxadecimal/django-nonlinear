@@ -1,0 +1,105 @@
+<style>
+  .htmx-indicator {
+    visibility: hidden;
+    /* display:none; */
+  }
+  .sortable-highlight {
+    background-color: var(--pico-text-selection-color);
+  }
+  .bi-arrows-move {
+    font-size: 1.5rem;
+  }
+</style>
+
+<!-- <div class="htmx-indicator">
+  Updating... <i class="bi bi-arrow-clockwise"></i>
+</div> -->
+
+<section id="tasks1" 
+
+hx-trigger="poll" 
+hx-get 
+hx-target="#tasks1"
+hx-swap="innerHTML"
+hx-select="#tasks1">
+
+<form
+  {% if sortable_disabled %}
+  {% else %}
+  class="sortable"
+  {% endif %}
+  id="tasks"
+  hx-trigger="end"
+  hx-post
+  hx-target="#tasks"
+  hx-swap="outerHTML"
+  hx-select="#tasks"
+>
+  {% csrf_token %} 
+  
+  {% for task in tasks %}
+  <article class="row p-0 m-1 pt-3 task prevent-select" id="task-{{task.id}}" >
+    
+    <input type="hidden" name="task_id" value="{{task.id}}" />
+    <input type="hidden" name="task_order" value="{{task.order}}" />
+    <input type="hidden" name="task_index" value="{{forloop.counter0}}" />
+
+    
+    <div class="col-auto">
+      <p><strong>{{task.workspace_slug}}</strong></p>
+    </div>
+
+    <div class="col">
+      <strong class="prevent-select">{{task.name}}</strong>
+
+    </div>
+
+    <div class="col-auto">
+      <i class="bi bi-{{task.priority}}-circle task-priority"></i>
+    </div>
+
+    <div class="col-auto">
+      <span
+        style="
+          border-radius: 10px;
+        "
+        class="p-2 stage stage-{{task.stage}}"
+        >{{task.get_stage_display}}</span
+      >
+    </div>
+    
+
+
+    <div class="col-auto">
+      <p>
+        <i class="bi bi-clock"></i>
+        <span>{{task.created_at.date|date:"M d"}}</span>
+        <span>{{task.due_at.date|date:"M d"}}</span>
+        <a
+          href="#"
+          data-tooltip="{{task.git_slug}}"
+          role="button"
+          class="p-0 m-0 outline"
+          onclick="navigator.clipboard.writeText('{{task.git_slug}}');"
+          style="border: 0"
+          ><i class="bi bi-git"></i
+        ></a>
+      </p>
+    </div>
+
+    <div class="col-auto draggable">
+      <!-- <i class="bi bi-chevron-bar-expand"></i> -->
+      <a
+      href="/nonlinear/task/{{task.id}}/edit"
+      role="button"
+      class="p-0 m-0 outline"
+      style="border: 0"
+      ><i class="bi bi-pencil-square"></i
+    > Edit</a>
+    </div>
+  </article>
+  {% endfor %}
+  </div>
+</form>
+
+</section>

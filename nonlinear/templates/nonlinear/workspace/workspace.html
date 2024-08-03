@@ -1,0 +1,80 @@
+{% extends "nonlinear/base.html" %}
+
+{% block title %}Nonlinear: Workspace: {{workspace.name}}{% endblock title %}
+
+{% block header %}
+
+{% endblock header %}
+
+
+{% block main %}
+
+<aside class="left">
+  <h1 style="font-size: 1rem;" class="text-center">{{workspace.name}}</h1>
+  <nav>
+    <ul>
+      <li><a href="{% url 'nonlinear-task-create' workspace_pk=workspace.id %}">Add Task</a></li>
+      <li><a href="{% url 'nonlinear-tasks-user-active' workspace_pk=workspace.id %}">Your Active Tasks</a></li>
+      <li><a href="{% url 'nonlinear-tasks-user' workspace_pk=workspace.id %}">Your Tasks</a></li>
+      <li><a href="{% url 'nonlinear-workspace-view' workspace_pk=workspace.id %}">All Tasks</a></li>
+      <li><a href="{% url 'nonlinear' %}">Workspaces</a></li>
+    </ul>
+  </nav>
+
+  <form method="get">
+    {{ filter.form.as_p }}
+    <input type="submit" value="Search" />
+    <a href="{{request.path}}">Clear Filter</a>
+  </form>
+</aside>
+
+<div class="right">
+
+  <header>
+    <form>
+      <div role="group">
+        <input type="search" name="search" placeholder="Search" aria-label="Search" />
+        <a href="{{request.path}}" class="outline" role="button" style="border-radius: 0 0 0 0;">
+          ❌
+        </a>
+        <input type="submit" value="🔎" style="border-radius: 0 5rem 5rem 0;" />
+
+      </div>
+
+    </form>
+  </header>
+
+  <main style="min-height: 90vh;">
+    <form id="tasks" class="sortable" hx-trigger="end" hx-post hx-target="#tasks" hx-swap="outerHTML"
+      hx-select="#tasks">
+      {% csrf_token %}
+      {% for task in filter.qs %}
+      <article class="task row mb-0 draggable prevent-select">
+        <input type="hidden" name="task_id" value="{{task.id}}" />
+        <input type="hidden" name="task_order" value="{{task.order}}" />
+        <input type="hidden" name="task_index" value="{{forloop.counter0}}" />
+        <div class="col-auto">
+          <p><strong>{{task.workspace_slug}}</strong></p>
+        </div>
+
+        <div class="col">
+          {{task.name}}
+        </div>
+
+        <div class="col-auto px-1">
+          <span style="border-radius: 10px;" class="p-2 stage stage-{{task.stage}}">{{task.get_stage_display}}</span>
+        </div>
+        <div class="col-auto draggable ps-0">
+          <!-- <i class="bi bi-chevron-bar-expand"></i> -->
+          <a href="/nonlinear/task/{{task.id}}/edit" role="button" class="p-0 ms-2 outline" style="border: 0"><i
+              class="bi bi-pencil-square"></i> Edit</a>
+        </div>
+      </article>
+      {% endfor %}
+    </form>
+  </main>
+
+  <footer class="flex-centered">
+  </footer>
+</div>
+{% endblock main %}

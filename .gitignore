@@ -1,0 +1,20 @@
+# OSX #
+.DS_Store
+*.swp
+
+# Byte-compiled / optimized / DLL files #
+__pycache__/
+*.py[cod]
+*$py.class
+*egg-info/
+
+# Django #
+*.log
+*.sqlite3
+staticfiles/
+.venv/
+
+# Extras
+.ignore/
+tasks.json
+TODO.md

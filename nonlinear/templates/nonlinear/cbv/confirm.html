@@ -1,0 +1,17 @@
+{% extends 'nonlinear/base.html' %}
+
+{% block content %}
+
+<article>
+<form method="post">
+{% csrf_token %}
+
+<fieldset role="group">
+<button onclick="history.back()" class="secondary">Cancel</button>
+<input type="submit" role="button" class="contrast" value="Confirm">
+</fieldset>
+
+</form>
+</article>
+
+{% endblock %}

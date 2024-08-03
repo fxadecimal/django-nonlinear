@@ -1,0 +1,9 @@
+<section id="activities">
+    <h5>Activity</h5>
+    {% for activity in task.activities.all %}
+    <article>
+      <p>{{activity.phrase_html|safe}}</p>
+      <p>{{activity.created_at|timesince}} ago</p>
+    </article>
+    {% endfor %}
+  </section>

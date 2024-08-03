@@ -1,0 +1,6 @@
+include *.md
+include LICENSE
+recursive-include nonlinear *
+exclude tox.ini
+exclude .isort.cfg
+prune .tx

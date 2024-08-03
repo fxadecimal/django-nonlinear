@@ -1,0 +1,32 @@
+{% extends 'nonlinear/base.html' %}
+{% load static %}
+{% block title %}Form{% endblock %} 
+
+
+
+
+{% block head %}
+
+{{ block.super }}
+{{ form.media }}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="">
+    <h1 class="text-center">{{heading}}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-block btn-success btn-lg">
+            {% if submit %}{{submit}}{% else %}
+            Submit
+            {% endif %}
+        </button>
+    </form>
+</div>
+
+{% endblock content %}
+
