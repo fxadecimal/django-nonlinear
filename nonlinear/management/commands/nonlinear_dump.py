@@ -13,7 +13,7 @@ from nonlinear.models import (
     Workspace,
 )
 
-from nonlinear.export_import import serialize_workspace
+from nonlinear.serializers import serialize_workspace
 
 
 class Command(BaseCommand):

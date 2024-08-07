@@ -2,5 +2,6 @@ include *.md
 include LICENSE
 recursive-include nonlinear *
 exclude tox.ini
+exclude sample_project
 exclude .isort.cfg
 prune .tx

@@ -4,9 +4,20 @@ from django.core import serializers
 from nonlinear.models import TaskComment, TaskActivity, Task
 
 
-def _serialize_deserialize(objects):
+def serialize_deserialize(
+    objects, use_natural_foreign_keys=False, use_natural_primary_keys=False, fields=None
+):
     # work around: serialize, deserialize
-    return json.loads(serializers.serialize("json", objects))
+    return json.loads(
+        serializers.serialize(
+            "json",
+            objects,
+            use_natural_foreign_keys=use_natural_foreign_keys,
+            use_natural_primary_keys=use_natural_primary_keys,
+            fields=fields,
+        )
+    )
+
 
 def serialize_workspace(
     workspace, exclude_deleted=False, include_comments=True, include_activities=True
@@ -24,8 +35,8 @@ def serialize_workspace(
         activities = activities.filter(is_deleted=False)
         tasks = tasks.filter(is_deleted=False)
 
-    workspace_list = _serialize_deserialize([workspace])
-    tasks_list = _serialize_deserialize(tasks) 
+    workspace_list = serialize_deserialize([workspace])
+    tasks_list = serialize_deserialize(tasks)
 
     # combine
     output = [
@@ -34,11 +45,11 @@ def serialize_workspace(
     ]
 
     if include_comments:
-        comments_list = _serialize_deserialize(comments.all()) 
+        comments_list = serialize_deserialize(comments.all())
         output.extend(comments_list)
 
     if include_activities:
-        activities_list = _serialize_deserialize(activities.all()) 
+        activities_list = serialize_deserialize(activities.all())
         output.extend(activities_list)
 
     return output

@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from django.contrib.auth import get_user_model
+from nonlinear.serializers import serialize_workspace, serialize_deserialize
 
 User = get_user_model()
 
@@ -44,8 +45,6 @@ class TestNonLinear(TestCase):
         task2.delete(soft_delete=False)
         self.assertFalse(Task.objects.get_queryset_all().filter(id=task2_id).exists())
 
-
-
     def test_change_task_state(self):
         self.assertIsNone(self.task.started_at)
         self.assertIsNone(self.task.ended_at)
@@ -54,27 +53,17 @@ class TestNonLinear(TestCase):
         self.task.save()
         self.task.refresh_from_db()
         self.assertIsNotNone(self.task.started_at)
-        
+
         self.task.stage = "done"
         self.task.save()
         self.task.refresh_from_db()
         self.assertIsNotNone(self.task.ended_at)
 
+    def test_serializer(self):
+        l = serialize_deserialize([self.workspace])
+        self.assertEqual(l[0]["fields"]["name"], "Test Workspace")
 
-
-
-        
-
-
-
-        
-
-
-
-
-
-
-
-
-
-        
+        l = serialize_workspace(self.workspace)
+        self.assertEqual(len(l), 2)
+        self.assertEqual(l[0]["fields"]["name"], "Test Workspace")
+        self.assertEqual(l[1]["fields"]["name"], "Test Task")
