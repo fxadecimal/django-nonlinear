@@ -31,7 +31,6 @@ Features
 - Task Exporter Command: `./manage.py nonlinear_dump workspace_slug`
 
 
-
 Quick Start: Run Sample Project
 ===============================
 
@@ -49,7 +48,7 @@ Or, add to your `requirements.txt`:
 git+https://github.com/fxadecimal/django-nonlinear.git
 ```
 
-Or, clone the repo directly:
+Or, clone the repo & install directly:
 
 ```sh
 git clone git@github.com:fxadecimal/django-nonlinear.git
@@ -60,7 +59,7 @@ Finally, migrate and run your server:
 
 ```sh
 # Run test server
-./manage.py migrate --noinput
+./manage.py migrate nonlinear --noinput
 ./manage.py runserver
 ```
 
