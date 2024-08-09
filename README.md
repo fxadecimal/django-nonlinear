@@ -36,22 +36,31 @@ Quick Start: Run Sample Project
 ===============================
 
 
+Either, install with pip:
+
+```sh
+pip install git+https://github.com/fxadecimal/django-nonlinear.git
+```
+
+Or, add to your `requirements.txt`:
+
+```sh
+# requirements.txt
+git+https://github.com/fxadecimal/django-nonlinear.git
+```
+
+Or, clone the repo directly:
+
 ```sh
 git clone git@github.com:fxadecimal/django-nonlinear.git
 cd django-nonlinear/sample_project
+```
 
-# (Optional) Create virtual environment
-pip -m venv .venv 
-source .venv/bin/activate
+Finally, migrate and run your server:
 
-# install dependencies
-pip install -r requirements.txt
-# install nonlinear package
-pip install ../
-
+```sh
 # Run test server
 ./manage.py migrate --noinput
-./manage.py createsuperuser
 ./manage.py runserver
 ```
 
