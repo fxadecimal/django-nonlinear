@@ -53,13 +53,15 @@ Or, clone the repo & install directly:
 ```sh
 git clone git@github.com:fxadecimal/django-nonlinear.git
 cd django-nonlinear/sample_project
+pip install -r requirements.txt
+pip install .. # installing non-linear manually
 ```
 
 Finally, migrate and run your server:
 
 ```sh
 # Run test server
-./manage.py migrate nonlinear --noinput
+./manage.py migrate nonlinear
 ./manage.py runserver
 ```
 
