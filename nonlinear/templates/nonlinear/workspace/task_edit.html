@@ -12,7 +12,11 @@
       <p data-tooltip="{{task.created_at}}">{{task.created_at|timesince}} ago</p>
       <p>By: {{task.created_by}}</p>
     </div>
-
+    <div>
+      <a href="#" data-tooltip="{{task.git_slug}}" role="button" class="p-0 m-0 outline"
+        onclick="navigator.clipboard.writeText('{{task.git_slug}}');" style="border: 0"><i class="bi bi-git"></i> Git
+        Branch Name</a>
+    </div>
     <!-- task.is_deleted: {{task.is_deleted}} -->
     <!-- task.is_archived: {{task.is_archived}} -->
     <!-- task.version: {{task.version}} -->
@@ -23,7 +27,7 @@
       <a role="button" class="outline" href="{% url 'nonlinear-workspace-view' workspace_pk=task.workspace.id %}">
         Back</a>
 
-        <input type="submit" value="Save" />
+      <input type="submit" value="Save" />
     </fieldset>
 </header>
 
@@ -64,7 +68,8 @@
       </form>
 
       <fieldset role="group">
-        <a role="button" href="{% url 'nonlinear-task-delete' pk=task.id %}" data-tooltip="Delete Task" class="secondary">Delete</a>
+        <a role="button" href="{% url 'nonlinear-task-delete' pk=task.id %}" data-tooltip="Delete Task"
+          class="secondary">Delete</a>
       </fieldset>
 
     </div>

@@ -15,9 +15,10 @@
   <link rel="stylesheet" href="{% static 'css/pico.classless.min.css' %}" />
   <link rel="stylesheet" href="{% static 'css/bootstrap-grid.min.css' %}" />
   <link rel="stylesheet" href="{% static 'css/easymde.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}" />
 
   <style>
-        .left {
+    .left {
       position: fixed;
       top: 0;
       left: 0;
@@ -116,11 +117,13 @@
     .form-label {
       font-weight: bold;
     }
+
     article.task {
       font-weight: bold;
       border: 1px solid var(--pico-muted-border-color);
     }
-    .sortable-highlight{
+
+    .sortable-highlight {
       background-color: var(--pico-muted-border-color);
     }
   </style>
@@ -131,8 +134,8 @@
 <body>
   {% block body %}
   {% block header %}
-  {% endblock header %} 
-  
+  {% endblock header %}
+
   {% block main %}
   <main style="min-height: 90vh!important;">
     {% block main_content %}

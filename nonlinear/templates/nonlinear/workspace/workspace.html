@@ -60,7 +60,16 @@
         <div class="col">
           {{task.name}}
         </div>
-
+        <div class="col-auto">
+          <p>
+            <i class="bi bi-clock"></i>
+            <span>{{task.created_at.date|date:"M d"}}</span>
+            <span>{{task.due_at.date|date:"M d"}}</span>
+            <a href="#" data-tooltip="{{task.git_slug}}" role="button" class="p-0 m-0 outline"
+              onclick="navigator.clipboard.writeText('{{task.git_slug}}');" style="border: 0"><i
+                class="bi bi-git"></i></a>
+          </p>
+        </div>
         <div class="col-auto px-1">
           <span style="border-radius: 10px;" class="p-2 stage stage-{{task.stage}}">{{task.get_stage_display}}</span>
         </div>
@@ -68,7 +77,9 @@
           <!-- <i class="bi bi-chevron-bar-expand"></i> -->
           <a href="/nonlinear/task/{{task.id}}/edit" role="button" class="p-0 ms-2 outline" style="border: 0"><i
               class="bi bi-pencil-square"></i> Edit</a>
+
         </div>
+
       </article>
       {% endfor %}
     </form>
