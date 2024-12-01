@@ -188,3 +188,5 @@ MARKDOWNIFY = {
         "WHITELIST_ATTRS": ["href", "src", "alt", "title", "class", "style"],
     }
 }
+
+LOGIN_REDIRECT_URL = "/admin/"
