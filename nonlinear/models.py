@@ -144,7 +144,7 @@ class BaseManager(models.Manager):
         return super().get_queryset()
 
 
-class TaskManger(BaseManager):
+class TaskManager(BaseManager):
     def get_queryset(self):
         return (
             super()
@@ -186,7 +186,7 @@ class Workspace(BaseModel):
 
 
 class Task(BaseModel):
-    objects = TaskManger()
+    objects = TaskManager()
     # form_class = TaskForm
 
     class Meta:

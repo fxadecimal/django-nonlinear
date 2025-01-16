@@ -13,9 +13,16 @@ __pycache__/
 *.sqlite3
 staticfiles/
 .venv/
+config/
+requirements.txt
+manage.py
 
 # Extras
 .ignore/
 tasks.json
 TODO.md
 build/
+
+# nonlinear test files
+nonlinear_test_data.py
+

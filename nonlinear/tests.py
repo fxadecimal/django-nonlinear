@@ -67,3 +67,20 @@ class TestNonLinear(TestCase):
         self.assertEqual(len(l), 2)
         self.assertEqual(l[0]["fields"]["name"], "Test Workspace")
         self.assertEqual(l[1]["fields"]["name"], "Test Task")
+
+    def test_task_comment(self):
+        self.task.comments.create(description="Test Comment")
+        self.assertEqual(self.task.comments.first().description, "Test Comment")
+        self.assertEqual(self.task.comments.first().text, "Test Comment")
+        self.assertEqual(self.task.comments.first().task, self.task)
+
+    def test_filters(self):
+        from nonlinear.filters import TaskFilter
+
+        qs = Task.objects.get_queryset()
+        f = TaskFilter(
+            {"search": "Test Task"},
+            qs,
+        )
+        self.assertEqual(f.qs.count(), 1)
+        self.assertEqual(f.qs.first().name, "Test Task")

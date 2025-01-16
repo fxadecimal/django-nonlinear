@@ -26,5 +26,5 @@ class TaskFilter(django_filters.FilterSet):
             Q(name__icontains=value)
             | Q(description__icontains=value)
             | Q(tags_csv__icontains=value)
-            | Q(_workspace_slug__icontains=value)
+            # | Q(_workspace_slug__icontains=value)
         )
