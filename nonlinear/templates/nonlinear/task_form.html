@@ -52,11 +52,15 @@
 </div>
 
 
-{% block footer %}
-{% endblock %}
+{% endblock content %}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+{% block footer %}
+{% endblock footer %}
+
+
+
+{% block scripts %}
+{{ block.super }}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const textarea = document.getElementById("id_description");
@@ -76,6 +80,4 @@
 
 
 </script>
-
-
-{% endblock content %}
+{% endblock scripts %}

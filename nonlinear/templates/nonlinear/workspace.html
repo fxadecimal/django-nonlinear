@@ -238,8 +238,11 @@
         height: 90vh;
     }
 </style>
-<script src="https://unpkg.com/htmx.org@2.0.4"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+{% endblock main %}
+
+{% block scripts %}
+{{ block.super }}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -286,5 +289,4 @@
         });
     }
 </script>
-
-{% endblock %}
+{% endblock scripts %}
