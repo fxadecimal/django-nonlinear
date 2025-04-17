@@ -1,14 +1,15 @@
 from django.test import TestCase
 
 from django.contrib.auth import get_user_model
-from nonlinear.serializers import serialize_workspace, serialize_deserialize
 
 User = get_user_model()
 
-from .models import (
+from nonlinear.models import (
     Workspace,
     Task,
 )
+from nonlinear.views import TaskFilter
+from nonlinear.utils import serailize_workspace
 
 
 # Create your tests here.
@@ -30,8 +31,8 @@ class TestNonLinear(TestCase):
         self.assertEqual(workspace2.slug, "test2")
 
     def test_create_task(self):
-        self.assertEqual(self.task.slug, "test-task")
-        self.assertEqual(self.task.git_slug, "test-1_test-task")
+        self.assertEqual(self.task.slug, "test-001")
+        self.assertEqual(self.task.full_slug, "test-001_test-task")
         task2 = Task.objects.create(
             name="Test Task 2",
             description="Test Description 2",
@@ -60,22 +61,11 @@ class TestNonLinear(TestCase):
         self.assertIsNotNone(self.task.ended_at)
 
     def test_serializer(self):
-        l = serialize_deserialize([self.workspace])
-        self.assertEqual(l[0]["fields"]["name"], "Test Workspace")
-
-        l = serialize_workspace(self.workspace)
-        self.assertEqual(len(l), 2)
-        self.assertEqual(l[0]["fields"]["name"], "Test Workspace")
-        self.assertEqual(l[1]["fields"]["name"], "Test Task")
-
-    def test_task_comment(self):
-        self.task.comments.create(description="Test Comment")
-        self.assertEqual(self.task.comments.first().description, "Test Comment")
-        self.assertEqual(self.task.comments.first().text, "Test Comment")
-        self.assertEqual(self.task.comments.first().task, self.task)
+        l = serailize_workspace(workspace=self.workspace)
+        self.assertEqual(l["workspace"][0]["fields"]["name"], "Test Workspace")
+        self.assertEqual(l["workspace"][0]["fields"]["slug"], "test")
 
     def test_filters(self):
-        from nonlinear.filters import TaskFilter
 
         qs = Task.objects.get_queryset()
         f = TaskFilter(

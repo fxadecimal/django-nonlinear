@@ -2,38 +2,30 @@
 
 ## Manage your Django project inside your Django project
 
+**New Complete Redesign!**
 
 ![screenshot.png](screenshot.png)
 
-
-Overview
-========
+# Overview
 
 [Django-Nonlinear](https://github.com/fxadecimal/django-nonlinear) is inspired by [linear.app](https://linear.app).
-
 
 Nonlinear tries it's best to get out of your way so you can focus on building the product & not managing the tool.
 
 It has 2 main use-cases:
 
-- Small or low-cost projects
-- Privacy or Regulatory compliance
+-   Small or low-cost projects
+-   Privacy or Regulatory compliance
 
+# Features
 
-Features
-========
+-   Git branch name generator e.g. `workspace-1_create-gpt-5`
+-   Draggable task list (Sortable / HTMX)
+-   Multiple Workspaces supported with different groups of users
+-   Markdown Support
+-   Task Exporter Command: `./manage.py nonlinear_dump [workspace_slug]`
 
-
-- Git branch name generator e.g. `workspace-1_create-gpt-5`
-- Draggable task list (Sortable / HTMX)
-- Multiple Workspaces supported
-- Markdown Support
-- Task Exporter Command: `./manage.py nonlinear_dump workspace_slug`
-
-
-Quick Start: Run Sample Project
-===============================
-
+# Quick Start: Run Sample Project
 
 Either, install with pip:
 
@@ -46,6 +38,8 @@ Or, add to your `requirements.txt`:
 ```sh
 # requirements.txt
 git+https://github.com/fxadecimal/django-nonlinear.git
+# optionally install pyyaml, if you want yaml export
+pip install pyyaml
 ```
 
 Or, clone the repo & install directly:
@@ -67,11 +61,9 @@ Finally, migrate and run your server:
 
 Create a new workspace & add yourself:
 
-- [http://localhost:8000/admin/nonlinear/workspace/](http://localhost:8000/admin/nonlinear/workspace/)
+-   [http://localhost:8000/admin/nonlinear/workspace/](http://localhost:8000/admin/nonlinear/workspace/)
 
-
-Quick Start: Add to an existing Project:
-========================================
+# Quick Start: Add to an existing Project:
 
 ```sh
 # using your python environment
@@ -89,6 +81,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_filters",
+    "colorfield",
     "nonlinear",
 ]
 ```
@@ -113,9 +106,7 @@ Migrate Nonlinear:
 
 (optional) Collect Static: `./manage.py collectstatic`
 
-
-Quickstart: Docker-compose
-==========================
+# Quickstart: Docker-compose
 
 ```sh
 docker-compose up --build
@@ -123,21 +114,17 @@ docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py createsuperuser
 ```
 
+# Planned Features
 
-Planned Features
-================
+-   User Comments
+-   Task Activity
+-   Project View
+-   Calendar View
+-   User Centric Lists
+-   Rest API
 
-- User Comments
-- Task Activity
-- Project View
-- Calendar View
-- User Centric Lists
-- Rest API
+# References
 
-
-References
-==========
-
-- [Nearbeach](https://github.com/nearbeach/NearBeach/)
-- [django-countries](https://github.com/SmileyChris/django-countries)
-- [djangox](https://github.com/wsvincent/djangox)
+-   [Nearbeach](https://github.com/nearbeach/NearBeach/)
+-   [django-countries](https://github.com/SmileyChris/django-countries)
+-   [djangox](https://github.com/wsvincent/djangox)

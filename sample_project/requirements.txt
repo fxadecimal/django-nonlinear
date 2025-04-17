@@ -3,3 +3,4 @@ django-filter~=24.2
 django-crispy-forms~=2.3
 crispy-bootstrap5~=2024.2
 django-markdownify~=0.9.5
+django-colorfield~=0.13.0

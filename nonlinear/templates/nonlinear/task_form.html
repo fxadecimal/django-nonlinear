@@ -1,0 +1,81 @@
+{% extends "nonlinear/workspace.html" %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+
+
+<div class="container" style="margin-top: 100px;">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <article class="card mb-5 shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 id="task_slug" style="cursor: pointer;" onclick="copyToClipboard('{{task.full_slug}}')">
+                        {{task.full_slug}}
+                        <i class="bi bi-clipboard"></i>
+                    </h2>
+                    <div>
+                        <a href="{% url 'nonlinear_task_delete' task.pk %}" class="btn btn-danger" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        </button>
+                        <button class="btn btn-primary" onclick="document.querySelector('form').submit()" title="Save">
+                            <i class="bi bi-floppy-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-header">
+                    <dl class="row">
+                        <dt class="col-sm-3">Created</dt>
+                        <dd class="col-sm-9">{{ task.created_at|naturaltime }} by {{ task.created_by }}</dd>
+
+                        <dt class="col-sm-3">Last Updated</dt>
+                        <dd class="col-sm-9">{{ task.updated_at|naturaltime }}</dd>
+                    </dl>
+                </div>
+                <div class="card-body">
+
+                    <div>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ form | crispy}}
+                        </form>
+                    </div>
+            </article>
+        </div>
+    </div>
+</div>
+
+
+{% block footer %}
+{% endblock %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const textarea = document.getElementById("id_description");
+        const easyMDE = new EasyMDE({
+            element: textarea,
+            spellChecker: true,
+            uploadImage: false,
+
+            status: ["lines", "words", "cursor"], // Optional usage
+        });
+
+        document.querySelectorAll('.dateinput').forEach(function (input) {
+            input.type = 'date';
+        });
+
+    });
+
+
+</script>
+
+
+{% endblock content %}

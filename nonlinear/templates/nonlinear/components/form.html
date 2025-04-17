@@ -1,0 +1,14 @@
+{% extends "nonlinear/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<main class="container mt-5">
+    <article class="card card-body">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form | crispy}}
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+    </article>
+</main>
+{% endblock content %}

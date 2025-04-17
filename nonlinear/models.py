@@ -1,325 +1,277 @@
-# -*- coding: utf-8 -*-
-import re
 import uuid
 from django.db import models
 
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-from django.utils.text import slugify
-from django.utils import timezone
-from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.db.models import Q, F
-from django.db.models.functions import Concat
+from django.urls import reverse
 
 
 User = get_user_model()
 
-TASK_TYPES = (
-    ("ticket", "Ticket"),
-    ("task", "Task"),
+
+from django.db.models import (
+    F,
+    Value,
+    Q,
+    Count,
+    Sum,
+    CharField,
+    IntegerField,
+    FloatField,
+    Window,
 )
-
-TASK_STAGES = (
-    ("in_progress", "In Progress"),
-    ("todo", "To Do"),
-    ("backlog", "Backlog"),
-    ("done", "Done"),
-)
-
-PROJECT_STATUSES = (
-    ("pending", "Pending"),
-    ("active", "Active"),
-    ("completed", "Completed"),
-    ("archived", "Archived"),
-)
-
-URGENCY_LEVELS = (
-    (1, "Severe"),
-    (2, "High"),
-    (3, "Medium"),
-    (4, "Low"),
-)
-
-TSHIRT_SIZES = (
-    (1, "XS"),
-    (2, "S"),
-    (4, "M"),
-    (8, "L"),
-    (16, "XL"),
-    (32, "XXL"),
-)
+from django.db.models.functions import Concat, Cast, LPad, RowNumber
+from django.utils.text import slugify
+from colorfield.fields import ColorField
 
 
-class LockAbstract(models.Model):
-    class Meta:
-        abstract = True
-
-    locked_at = models.DateTimeField(blank=True, null=True)
-    locked_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        related_name="locked_%(class)s",
-        blank=True,
-        null=True,
-    )
-
-
-class BaseModel(models.Model):
-    APP_NAME = "nonlinear"
-
-    class Meta:
-        abstract = True
-
+class TimestampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        # related_name="%(class)s_created",
-        related_name="+",
-        blank=True,
-        null=True,
-    )
-    is_deleted = models.BooleanField(default=False)
-    version = models.PositiveIntegerField(default=1)
 
-    name = models.CharField(max_length=256, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    tags_csv = models.CharField(
-        max_length=256, blank=True, null=True
-    )  # todo: replace this with django-taggit
+    class Meta:
+        abstract = True
+
+
+class Versioned(models.Model):
+    version = models.IntegerField(default=1)
+
+    class Meta:
+        abstract = True
 
     def save(self, *args, **kwargs):
-        self.version += 1
+        if not self.pk:
+            self.version = 1
+        else:
+            self.version += 1
         return super().save(*args, **kwargs)
 
-    @property
-    def tags(self) -> list:
-        return re.split(r",\s*", self.tags_csv) if self.tags_csv else []
 
-    def delete(self, soft_delete=True, *args, **kwargs):
-        if soft_delete == False:
-            super().delete(*args, **kwargs)
-        else:
-            self.is_deleted = True
-            self.save()
+# Create your models here.
+class Workspace(TimestampedModel, Versioned):
+    class Meta:
+        ordering = ["-updated_at"]
 
-    def get_url_action(
-        self,
-        action="view",
-        workspace_pk=None,
-    ):
-        actions = ["view", "edit", "delete"]
-        if action not in actions:
-            raise ValueError(f"Invalid action: {action}")
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(
+        unique=True, max_length=10, help_text="Unique identifier for the workspace"
+    )
+    description = models.TextField(blank=True, null=True)
+    users = models.ManyToManyField(
+        User, related_name="nonlinear_workspaces", blank=True
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="+", null=True, blank=True
+    )
+    is_deleted = models.BooleanField(default=False)
+    task_counter = models.IntegerField(
+        default=0,
+    )
 
-        if workspace_pk is None:
-            workspace = getattr(self, "workspace", None)
-            if workspace is None:
-                raise ValueError(
-                    f"workspace_pk is required for {self.__class__.__name__}"
-                )
-            workspace_pk = workspace.pk
+    def get_absolute_url(self):
+        return reverse("nonlinear_workspace", kwargs={"slug": self.slug})
 
-        _class = self.__class__.__name__.lower()
-        return reverse(
-            f"{self.APP_NAME}-{_class}-{action}", kwargs={"workspace_pk": workspace_pk}
-        )
-
-    @property
-    def get_slug(self):
-        return self.pk
-
-    @property
-    def get_url_delete(self):
-        return self.get_url_action("delete", workspace_pk=self.workspace.pk)
+    def __str__(self):
+        return self.name
 
 
-class BaseManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
-
-    def get_queryset_all(self):
-        return super().get_queryset()
-
-
-class TaskManager(BaseManager):
+class TaskManager(models.Manager):
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .filter(is_archived=False)
             .annotate(
-                _workspace_slug=models.ExpressionWrapper(
-                    Concat(
-                        models.F("workspace__slug"),
-                        models.Value("-"),
-                        models.F("workspace_index"),
+                _slug=Concat(
+                    F("workspace__slug"),
+                    Value("-"),
+                    LPad(
+                        Cast(models.F("workspace_index"), models.CharField()),
+                        3,
+                        Value("0"),
                     ),
                     output_field=models.CharField(),
                 )
             )
         )
 
+    def active(self):
+        return self.get_queryset().filter(is_deleted=False)
 
-# Create your models here.
-class Workspace(BaseModel):
-    objects = BaseManager()
+    def deleted(self):
+        return self.get_queryset().filter(is_deleted=True)
 
-    slug = models.SlugField(max_length=16, unique=True)
-    users = models.ManyToManyField(User, related_name="+", blank=True)
-    # cycle_duration = models.DurationField(blank=True, null=True, default=86400*14)
-    # cycle_starts_at = models.DateTimeField(blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
+class Task(TimestampedModel, Versioned):
+    STATUS_CHOICES = [
+        ("in_progress", "In Progress"),
+        ("todo", "To Do"),
+        ("backlog", "Backlog"),
+        ("done", "Done"),
+        ("archived", "Archived"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    objects = TaskManager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    class Meta:
+        ordering = ["workspace", "status", "workspace_order", "updated_at"]
+        unique_together = (
+            "workspace",
+            "workspace_index",
+        )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
+    is_deleted = models.BooleanField(default=False)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name="tasks"
+    )
+    workspace_order = models.IntegerField(null=True)
+    workspace_index = models.IntegerField(null=True, editable=False)
+
+    subtasks = models.ManyToManyField(
+        "self", blank=True, symmetrical=False, related_name="+"
+    )
+
+    assigned_to = models.ManyToManyField(
+        User,
+        blank=True,
+        through="UserTask",
+    )
+
+    priority = models.IntegerField(
+        choices=[
+            (0, "Severe"),
+            (1, "High"),
+            (2, "Medium"),
+            (3, "Low"),
+        ],
+        default=2,
+        blank=True,
+        null=True,
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=STATUS_CHOICES,
+        default="backlog",
+    )
+    tags = models.ManyToManyField("Tag", blank=True, related_name="tasks")
+
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+
+    started_date = models.DateTimeField(null=True, blank=True)
+    ended_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Workspace({self.slug}): {self.name}"
+        return f"{self.slug} - {self.name}"
+
+    @property
+    def slug(self):
+        # return self._slug
+        return f"{self.workspace.slug}-{self.workspace_index:03d}"
+
+    @property
+    def full_slug(self):
+        return slugify(f"{self.slug}_{self.name}")
+
+    def save(self, *args, **kwargs):
+        if not self.workspace_index:
+            self.workspace_index = self.workspace.tasks.count() + 1
+        if not self.workspace_order:
+            self.workspace_order = self.workspace_index
+
+        # updated_at
+        self.workspace.save()
+
+        super().save(*args, **kwargs)
 
     @property
     def get_absolute_url(self):
-        return self.get_url_action("view", workspace_pk=self.pk)
+        return reverse("nonlinear_task_detail", kwargs={"pk": self.pk})
 
 
-class Task(BaseModel):
-    objects = TaskManager()
-    # form_class = TaskForm
-
-    class Meta:
-        unique_together = [("workspace", "workspace_index")]
-        ordering = ["order", "created_at"]
-
-    is_archived = models.BooleanField(default=False)
-    workspace = models.ForeignKey(
-        Workspace, on_delete=models.PROTECT, related_name="tasks"
+class UserTask(TimestampedModel):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="nonlinear_user_task"
     )
-    workspace_index = models.PositiveIntegerField(editable=True, blank=True, null=True)
-    slug = models.SlugField(max_length=256, null=True, blank=True)
-
-    assigned_to = models.ManyToManyField(User, related_name="+", blank=True)
-
-    priority = models.IntegerField(choices=URGENCY_LEVELS, blank=True, null=True)
-    stage = models.CharField(max_length=32, choices=TASK_STAGES, default="backlog")
-    story_points = models.PositiveIntegerField(
-        blank=True, null=True, choices=TSHIRT_SIZES
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="nonlinear_user_task"
     )
+    order = models.PositiveIntegerField(default=0)
 
-    starts_at = models.DateTimeField(blank=True, null=True)
-    due_at = models.DateTimeField(blank=True, null=True)
 
-    started_at = models.DateTimeField(blank=True, null=True)
-    ended_at = models.DateTimeField(blank=True, null=True)
-
-    order = models.PositiveIntegerField(blank=True, null=True)
-
-    parent_task = models.ForeignKey(
-        "self",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name="sub_tasks",
+class TaskComment(TimestampedModel):
+    is_deleted = models.BooleanField(default=False)
+    text = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="task_comments"
     )
-
-    def save(self, *args, **kwargs):
-
-        if not self.workspace_index:
-            next_task_index = (
-                Task.objects.get_queryset_all().filter(workspace=self.workspace).count()
-                + 1
-            )
-            self.workspace_index = next_task_index
-            self.order = next_task_index
-
-        if self.name:
-            self.slug = slugify(self.name)
-
-        if not self.started_at and self.stage == "in_progress":
-            self.started_at = timezone.now()
-
-        if not self.ended_at and (self.stage in ["done", "archived"]):
-            self.ended_at = timezone.now()
-
-        super().save(*args, **kwargs)
-
-    @property
-    def workspace_slug(self):
-        return f"{self.workspace.slug}-{self.workspace_index}"
-
-    @property
-    def git_slug(self):
-        return f"{self.workspace_slug}_{self.slug}"[0:254]
-
-
-# class UserTaskOrder(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-#     order = models.PositiveIntegerField(default=0)
-
-#     class Meta:
-#         unique_together = ("user", "task")
-
-
-class TaskCommentManager(BaseManager):
-    pass
-
-
-class TaskComment(BaseModel):
-    objects = TaskCommentManager()
-
-    class Meta:
-        ordering = ["-created_at"]
-
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
 
-    @property
-    def text(self):
-        return self.description
 
-
-class TaskActivityManager(BaseManager):
-    pass
-
-
-class TaskActivity(models.Model):
-    """
-    Inspiration: https://github.com/django-notifications/django-notifications?tab=readme-ov-file
-
-    - Actor. The object that performed the activity.
-    - Verb. The verb phrase that identifies the action of the activity.
-    - Action Object. (Optional) The object linked to the action itself.
-    - Target. (Optional) The object to which the activity was performed.
-
-    """
-
-    objects = TaskActivityManager()
+class Tag(TimestampedModel):
+    name = models.CharField(max_length=64)
+    color = ColorField(
+        null=True,
+        blank=True,
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="tags", null=True
+    )
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name="tags"
+    )
 
     class Meta:
-        ordering = ["-created_at"]
-        verbose_name_plural = "Task Activities"
+        unique_together = ("name", "workspace")
+        ordering = ["workspace", "name"]
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="activities")
-    verb = models.CharField(max_length=64)
-    action = models.CharField(max_length=256)
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        # related_name="%(class)s_created",
-        related_name="+",
-        blank=True,
-        null=True,
-    )
-    is_deleted = models.BooleanField(default=False)
+    def __str__(self):
+        return self.with_hash
 
     @property
-    def phrase(self):
-        #  justquick (actor) closed (verb) issue 2 (action_object) on activity-stream (target) 12 hours ago
-        return f"{self.created_by} {self.verb} {self.task.name} on {self.created_at}"
+    def with_hash(self):
+        return f"#{self.name}"
 
-    @property
-    def phrase_html(self):
-        return f'<p id="task-activity-{self.id}"> <a href="#">{self.created_by}</a> {self.verb} on <a href="#">{self.task.name}</a></p>'
+
+# class AcitivityLog(models.Model):
+
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     action = models.CharField(max_length=255)
+#     details = models.TextField(null=True, blank=True)
+
+#     workspace = models.ForeignKey(
+#         Workspace,
+#         on_delete=models.CASCADE,
+#         related_name="activity_logs",
+#         null=True,
+#         blank=True,
+#     )
+
+#     created_by = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name="activity_logs",
+#         null=True,
+#         blank=True,
+#     )
+
+#     task = models.ForeignKey(
+#         Task,
+#         on_delete=models.CASCADE,
+#         related_name="activity_logs",
+#         null=True,
+#         blank=True,
+#     )
+
+#     def __str__(self):
+#         return f"{self.user} - {self.action} - {self.task}"

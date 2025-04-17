@@ -1,0 +1,35 @@
+{% extends "nonlinear/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+<header class="my-5">
+    <h1>Your Nonlinear Workspaces</h1>
+</header>
+
+{% for object in object_list %}
+<article class="card card-body mb-2" style="cursor: pointer;"
+    onclick="window.location.href='{{ object.get_absolute_url }}'">
+    <div class="d-flex align-content-center justify-content-between">
+        <div>
+            {{ object }}
+        </div>
+    </div>
+</article>
+{% endfor %}
+
+
+<p>
+    {% if not object_list %}
+    You don't have any nonlinear workspaces yet. <a href="{% url 'admin:nonlinear_workspace_changelist' %}">Go to
+        admin</a>.
+    {% endif %}
+</p>
+</p>
+
+
+{% endblock %}

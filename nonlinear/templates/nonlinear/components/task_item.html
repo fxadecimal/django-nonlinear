@@ -1,0 +1,60 @@
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load nonlinear_tags %}
+<article class="card bg-dark mb-1 shadow-sm" style="transition: all 0.2s ease-in-out; background: #1f2937 !important;"
+    id="task-{{task.id}}">
+
+    <input type="hidden" name="task_id" value="{{task.id}}" />
+    <input type="hidden" name="workspace_order" value="{{task.workspace_order}}" />
+    <input type="hidden" name="qs_position" value="{{task.qs_position}}" />
+    <input type="hidden" name="task_index" value="{{forloop.counter0}}" />
+
+    <div class="card-body p-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                {% if sortable == True %}
+                <i class="bi bi-grip-vertical text-secondary" style="cursor: move;"></i>
+                {% endif %}
+                <div class="priority bg-{{task.get_priority_display.lower}} rounded-circle"
+                    style="width: 6px; height: 6px"></div>
+                <h3 class="mb-0 small fw-medium text-light" style="cursor: pointer;"
+                    onclick="copyToClipboard('{{task.full_slug}}')" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Copy:{{task.full_slug}}">
+                    {{task.slug}}</h3>
+
+                <p class="mb-0 small">{{task.name}}</p>
+                <p class="mb-0 small text-secondary">{{task.get_status_display}}</p>
+                <!-- <p class="mb-0 small text-secondary">{{task.workspace_order}}</p> -->
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="small text-secondary d-none d-md-block">{{task.updated_at|naturaltime}}</span>
+                {% for tag in task.tags.all|slice:":5" %}
+                <a href="{% url 'nonlinear_workspace' slug=workspace.slug %}?search={{tag|urlencode}}"
+                    class="badge bg-secondary d-none d-md-block text-decoration-none" {% if tag.color %}
+                    style="background:{{tag.color}}!important" {% endif %}>
+                    {{ tag }}
+                </a>
+                {% endfor %}
+                <div>
+                    {% if task.assigned_to.exists %}
+                    {% for user in task.assigned_to.all|slice:":5" %}
+                    <i class="bi bi-person-fill" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{ user }}"></i>
+                    {% endfor %}
+                    {% else %}
+                    <i class="bi bi-person" data-bs-toggle="tooltip" data-bs-placement="top" title="Unassigned"></i>
+                    {% endif %}
+                </div>
+
+
+                <a href="{{task.get_absolute_url}}" class="btn btn-sm btn-secondary">View</a>
+            </div>
+            <!-- <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+        style="width: 24px; height: 24px;">
+        <small class="text-light">{{task.assigned_to}}</small>
+    </div> -->
+        </div>
+    </div>
+</article>

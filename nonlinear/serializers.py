@@ -1,55 +1,47 @@
-from pprint import pprint
-import json
-from django.core import serializers
-from nonlinear.models import TaskComment, TaskActivity, Task
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+from nonlinear.models import TaskComment, Tag, Task, Workspace
+from rest_framework import serializers
 
 
-def serialize_deserialize(
-    objects, use_natural_foreign_keys=False, use_natural_primary_keys=False, fields=None
-):
-    # work around: serialize, deserialize
-    return json.loads(
-        serializers.serialize(
-            "json",
-            objects,
-            use_natural_foreign_keys=use_natural_foreign_keys,
-            use_natural_primary_keys=use_natural_primary_keys,
-            fields=fields,
-        )
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = "__all__"
+        read_only_fields = ["id", "slug", "created_at", "updated_at"]
+        extra_kwargs = {
+            "description": {"required": False},
+            "due_date": {"required": False},
+            "tags": {"required": False},
+        }
+
+    created_by = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), default=serializers.CurrentUserDefault()
     )
+    workspace = serializers.PrimaryKeyRelatedField(queryset=Workspace.objects.all())
+    # assigned_to = serializers.PrimaryKeyRelatedField(
+    #     queryset=User.objects.all(), required=False
+    # )
 
 
-def serialize_workspace(
-    workspace, exclude_deleted=False, include_comments=True, include_activities=True
-):
-    comments = TaskComment.objects.get_queryset_all().filter(
-        task__workspace_id=workspace.id
+class WorkspaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workspace
+        fields = "__all__"
+        read_only_fields = ["id", "slug"]
+
+    tasks = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    created_by = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), default=serializers.CurrentUserDefault()
     )
-    activities = TaskActivity.objects.get_queryset_all().filter(
-        task__workspace_id=workspace.id
-    )
-    tasks = Task.objects.get_queryset_all().filter(workspace_id=workspace.id)
-
-    if exclude_deleted == False:
-        comments = comments.filter(is_deleted=False)
-        activities = activities.filter(is_deleted=False)
-        tasks = tasks.filter(is_deleted=False)
-
-    workspace_list = serialize_deserialize([workspace])
-    tasks_list = serialize_deserialize(tasks)
-
-    # combine
-    output = [
-        *workspace_list,
-        *tasks_list,
-    ]
-
-    if include_comments:
-        comments_list = serialize_deserialize(comments.all())
-        output.extend(comments_list)
-
-    if include_activities:
-        activities_list = serialize_deserialize(activities.all())
-        output.extend(activities_list)
-
-    return output
+    workspace = serializers.PrimaryKeyRelatedField(queryset=Workspace.objects.all())

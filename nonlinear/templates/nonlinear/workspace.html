@@ -1,0 +1,290 @@
+{% extends "nonlinear/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load nonlinear_tags %}
+
+
+{% block main %}
+
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar (left column) -->
+        <aside class="border-end p-3 sidebar overflow-auto bg-dark" style="height: 100vh; position: fixed; width: 15%;">
+            <div class="d-flex flex-column justify-content-between" style="height: 100%;">
+                <div>
+                    <h5 class="fw-semibold mb-3">Nonlinear</h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">
+                            Home
+                        </a>
+                        <!-- <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">Tasks</a>
+                        <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">Projects</a> -->
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                    </nav>
+                </div>
+                <div>
+                    <div class="mt-2">
+                        <!-- <button class="btn btn-secondary rounded-circle mb-2"
+                            onclick="document.documentElement.setAttribute('data-bs-theme', document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark')">
+                            <i class="bi bi-moon-stars-fill"></i>
+                        </button> -->
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3">
+                                <div>
+                                    <h6 class="mb-0">{{ user|truncatechars:20 }}</h6>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Main content area (right column) -->
+        <main class="overflow-auto p-3" style="margin-left: 15%; height: 100vh; width:85%">
+            <!-- Floating status bar -->
+
+
+            <div class="container-fluid">
+                <div class="mb-2">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-12">
+                            <header class="d-flex align-items-center justify-content-between mb-1">
+                                <div>
+                                    <h2 class="h4 mb-1">{{ workspace.name }}</h2>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary btn-sm"
+                                        hx-get="{% url 'nonlinear_task_create' workspace.slug %}"
+                                        hx-target="#taskModal .modal-content" hx-trigger="click" data-bs-toggle="modal"
+                                        data-bs-target="#taskModal">
+                                        <i class="bi bi-plus-lg me-1"></i>New Task
+                                    </button>
+                                </div>
+                            </header>
+
+                            <header class="border-bottom pb-3" id="filter-bar">
+                                <form method="get" class="d-flex flex-row gap-3 align-items-center w-100">
+                                    {% for field in filter.form %}
+                                    <div class="mb-0 flex-grow-1">
+                                        {{ field|as_crispy_field }}
+                                    </div>
+                                    {% endfor %}
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                                        <a href="{% url 'nonlinear_workspace' workspace.slug %}"
+                                            class="btn btn-secondary btn-sm">Clear</a>
+                                    </div>
+                                </form>
+                            </header>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                {% if not object_list %}
+                <div class="alert alert-info" role="alert">
+                    No tasks found.
+                    {% if request.GET %}
+                    <a href="{% url 'nonlinear_workspace' workspace.slug %}" class="">Clear filters</a>
+                    {% endif %}
+                </div>
+
+                {% endif %}
+
+                <section class="mb-5">
+
+                    {% csrf_token %}
+                    {% include "nonlinear/components/task_list.html" with task_list=object_list %}
+
+                </section>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+
+
+{% endblock content %}
+
+{% block modal %}
+
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Task details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock modal %}
+
+
+
+<style>
+    /* Smooth scrolling */
+    .sidebar,
+    main {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, .2) rgba(0, 0, 0, .1);
+    }
+
+    /* Custom scrollbar styling for webkit browsers */
+    .sidebar::-webkit-scrollbar,
+    main::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track,
+    main::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, .05);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb,
+    main::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, .2);
+        border-radius: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover,
+    main::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, .3);
+    }
+
+    .nav-link {
+        padding: 0.5rem 0;
+    }
+
+    .nav-link:hover {
+        color: var(--bs-primary);
+    }
+
+    [data-bs-theme="dark"] main {
+        background-color: #101827;
+    }
+
+    .bg-backlog {
+        background-color: var(--bs-primary) !important;
+    }
+
+    .bg-in-progress {
+        background-color: var(--bs-warning) !important;
+    }
+
+    .bg-completed {
+        background-color: var(--bs-success) !important;
+    }
+
+    .bg-archived {
+        background-color: var(--bs-secondary) !important;
+    }
+
+    .bg-cancelled {
+        background-color: var(--bs-danger) !important;
+    }
+
+    .bg-urgent {
+        background-color: var(--bs-danger) !important;
+    }
+
+    .bg-high {
+        background-color: var(--bs-warning) !important;
+    }
+
+    .sortable-highlight {
+        background-color: rgba(0, 123, 255, 0.2) !important;
+        border: 2px dashed rgba(0, 123, 255, 0.5) !important;
+    }
+
+    /* Hide sidebar on small screens */
+    @media (max-width: 1024px) {
+        .sidebar {
+            display: none;
+        }
+
+        main {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        footer {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+    }
+
+    .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 90vh;
+    }
+</style>
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        htmx.onLoad(function (e) {
+            // polling = setInterval(function () { console.log("hello") }, 5000);
+            var elements = document.querySelectorAll(".sortable");
+            Array.from(elements).forEach(function (element) {
+                console.log(element);
+                var sortableInstance = new Sortable(element, {
+                    animation: 350,
+                    filter: ".htmx-indicator",
+                    swapClass: "sortable-highlight",
+
+                    selectedClass: 'sortable-highlight',
+                    multiDrag: false,
+                    fallbackTolerance: 3,
+                    filter: '.filtered',
+
+
+                    onMove: function (evt) {
+                        return evt.related.className.indexOf("htmx-indicator") === -1;
+                    },
+
+                    onStart: function (evt) {
+                        // clearInterval(polling);
+                        console.log("onStart")
+                    },
+                    onEnd: function (evt) {
+                        sortableInstance.option("disabled", true);
+                    },
+                });
+
+                element.addEventListener("htmx:afterSwap", function () {
+                    sortableInstance.option("disabled", false);
+                });
+            });
+        });
+    });
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function () {
+            alert(text + ' copied to clipboard!');
+        }).catch(function (err) {
+            console.error('Failed to copy text: ', err);
+        });
+    }
+</script>
+
+{% endblock %}

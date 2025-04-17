@@ -1,0 +1,16 @@
+<footer class="position-fixed bottom-0 end-0 p-3" style="margin-left: 15%; width: 85%; z-index: 1030;" hx-get
+    hx-trigger="every 10s" hx-target="#status-bar" hx-select="#status-bar" hx-swap="innerHTML" id="status-bar">
+    <div class="container-fluid bg-body-tertiary border py-2 rounded-3 shadow-sm">
+        <div class="row">
+            <div class="col-4">
+                <small>User: {{ user|truncatechars:20 }}</small>
+            </div>
+            <div class="col-4 text-center">
+                <small>Todo: {{users_tasks_pending}} / Total: {{users_tasks}}</small>
+            </div>
+            <div class="col-4 text-end">
+                <small>Last updated: {{workspace.updated_at|naturaltime}}</small>
+            </div>
+        </div>
+    </div>
+</footer>
