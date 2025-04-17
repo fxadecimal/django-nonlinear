@@ -29,9 +29,9 @@ class WorkspaceAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
         "display_tags",
-        "slug",
         "task_counter",
         "get_tasks",
+        "version",
     )
     autocomplete_fields = ["users"]  # Assuming there's a users field in Workspace
     search_fields = ["name", "slug"]  # Fields to search in Workspace
@@ -100,7 +100,12 @@ class TaskAdmin(admin.ModelAdmin):
     )
     list_filter = ["workspace"]  # Add filter for workspace
     search_fields = ["name", "slug"]
-    readonly_fields = ["created_at", "updated_at", "slug"]
+    readonly_fields = [
+        "created_at",
+        "updated_at",
+        "slug",
+        "version",
+    ]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
