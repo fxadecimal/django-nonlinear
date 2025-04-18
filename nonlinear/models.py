@@ -242,6 +242,20 @@ class Tag(TimestampedModel):
     def with_hash(self):
         return f"#{self.name}"
 
+    @property
+    def text_color(self):
+        """
+        inverts the color for better contrast
+        """
+        if self.color:
+            r, g, b = self.color[1:3], self.color[3:5], self.color[5:7]
+            r, g, b = int(r, 16), int(g, 16), int(b, 16)
+            # Calculate the luminance
+            luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+            # Return black or white based on luminance
+            return "#000000" if luminance > 0.5 else "#FFFFFF"
+        return "#000000"
+
 
 # class AcitivityLog(models.Model):
 

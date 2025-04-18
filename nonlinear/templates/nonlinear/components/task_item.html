@@ -33,7 +33,7 @@
                 {% for tag in task.tags.all|slice:":5" %}
                 <a href="{% url 'nonlinear_workspace' slug=workspace.slug %}?search={{tag|urlencode}}"
                     class="badge bg-secondary d-none d-md-block text-decoration-none" {% if tag.color %}
-                    style="background:{{tag.color}}!important" {% endif %}>
+                    style="background:{{tag.color}}!important; color:{{tag.text_color}}" {% endif %}>
                     {{ tag }}
                 </a>
                 {% endfor %}
@@ -51,10 +51,7 @@
 
                 <a href="{{task.get_absolute_url}}" class="btn btn-sm btn-secondary">View</a>
             </div>
-            <!-- <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-        style="width: 24px; height: 24px;">
-        <small class="text-light">{{task.assigned_to}}</small>
-    </div> -->
+
         </div>
     </div>
 </article>
