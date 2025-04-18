@@ -6,13 +6,25 @@
 {% load nonlinear_tags %}
 
 
+{% block messages %}
+<div class="container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endblock messages %}
+
+
+
 {% block main %}
-
-
 
 {% block content %}
 
-<div class="container-fluid">
+
+<div class="container-fluid px-0">
     <div class="row">
         <!-- Sidebar (left column) -->
         <aside class="border-end p-3 sidebar overflow-auto bg-dark" style="height: 100vh; position: fixed; width: 15%;">
@@ -23,27 +35,23 @@
                         <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">
                             Home
                         </a>
-                        <!-- <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">Tasks</a>
-                        <a class="nav-link" href="{% url 'nonlinear_workspace' workspace.slug %}">Projects</a> -->
+
+                        {% if user.is_superuser %}
                         <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                        {% endif %}
+
                     </nav>
                 </div>
                 <div>
-                    <div class="mt-2">
-                        <!-- <button class="btn btn-secondary rounded-circle mb-2"
-                            onclick="document.documentElement.setAttribute('data-bs-theme', document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark')">
-                            <i class="bi bi-moon-stars-fill"></i>
-                        </button> -->
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center gap-3">
-                                <div>
-                                    <h6 class="mb-0">{{ user|truncatechars:20 }}</h6>
-                                </div>
-                            </div>
+                    <div class="border-0 p-1">
 
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-circle fs-4"></i>
+                            <div>
+                                <small class="text-muted">{{ user | truncatechars:10}}</small>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -51,7 +59,7 @@
         </aside>
 
         <!-- Main content area (right column) -->
-        <main class="overflow-auto p-3" style="margin-left: 15%; height: 100vh; width:85%">
+        <main class="pt-3" style="margin-left: 15%; height: 100vh; width:85%">
             <!-- Floating status bar -->
 
 
@@ -61,7 +69,7 @@
                         <div class="col-xl-12">
                             <header class="d-flex align-items-center justify-content-between mb-1">
                                 <div>
-                                    <h2 class="h4 mb-1">{{ workspace.name }}</h2>
+                                    <h2 class="h4 mb-1">Workspace: {{ workspace.name }}</h2>
                                 </div>
                                 <div>
                                     <button class="btn btn-primary btn-sm"
@@ -73,10 +81,13 @@
                                 </div>
                             </header>
 
-                            <header class="border-bottom pb-3" id="filter-bar">
-                                <form method="get" class="d-flex flex-row gap-3 align-items-center w-100">
+                            <header class=" pb-3" id="filter-bar">
+                                <form method="get"
+                                    class="card card-body d-flex flex-column flex-md-row gap-0 gap-md-3 align-items-md-center w-100"
+                                    style="background-color: #101827;">
+
                                     {% for field in filter.form %}
-                                    <div class="mb-0 flex-grow-1">
+                                    <div class="flex-grow-1">
                                         {{ field|as_crispy_field }}
                                     </div>
                                     {% endfor %}
@@ -112,6 +123,7 @@
 
             </div>
         </main>
+
     </div>
 </div>
 
@@ -140,34 +152,7 @@
 
 <style>
     /* Smooth scrolling */
-    .sidebar,
-    main {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0, 0, 0, .2) rgba(0, 0, 0, .1);
-    }
 
-    /* Custom scrollbar styling for webkit browsers */
-    .sidebar::-webkit-scrollbar,
-    main::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    .sidebar::-webkit-scrollbar-track,
-    main::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, .05);
-    }
-
-    .sidebar::-webkit-scrollbar-thumb,
-    main::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, .2);
-        border-radius: 4px;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb:hover,
-    main::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 0, 0, .3);
-    }
 
     .nav-link {
         padding: 0.5rem 0;
@@ -236,6 +221,32 @@
         justify-content: center;
         align-items: center;
         height: 90vh;
+    }
+
+
+    /* EasyMDE dark theme */
+    [data-bs-theme="dark"] .EasyMDEContainer .CodeMirror {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border-color: #404040;
+    }
+
+    [data-bs-theme="dark"] .editor-toolbar {
+        background-color: #2d2d2d;
+        border-color: #404040;
+    }
+
+    [data-bs-theme="dark"] .editor-toolbar button {
+        color: #d4d4d4;
+    }
+
+    [data-bs-theme="dark"] .editor-toolbar button:hover {
+        background-color: #404040;
+    }
+
+    [data-bs-theme="dark"] .editor-preview {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
     }
 </style>
 

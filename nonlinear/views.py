@@ -150,7 +150,7 @@ class TaskCreateView(UserInWorkspaceMixin, CreateView):
     model = Task
     # form_class = TaskForm
     template_name = "nonlinear/task_form.html"
-    fields = ["name"]
+    fields = ["name", "status"]
 
     def get_success_url(self):
         # return reverse("nonlinear_workspace", kwargs={"slug": self.kwargs["slug"]})
@@ -173,7 +173,7 @@ class TaskCreateView(UserInWorkspaceMixin, CreateView):
         return [self.template_name]
 
 
-class TaskView(LoginRequiredMixin, UpdateView):
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
     template_name = "nonlinear/task_form.html"
     context_object_name = "task"
