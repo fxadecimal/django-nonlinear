@@ -251,3 +251,47 @@ class TaskDeleteView(LoginRequiredMixin, UpdateView):
         self.object.save()
         messages.success(self.request, f'Task "{self.object.name}" has been deleted.')
         return super().form_valid(form)
+
+
+@login_required
+def create_comment(request, pk):
+
+    if request.method == "POST":
+        task = get_object_or_404(Task, pk=pk)
+
+        if request.user not in task.workspace.users.all():
+            raise PermissionDenied
+
+        comment_text = request.POST.get("comment")
+        TaskComment.objects.create(
+            task=task, text=comment_text, created_by=request.user
+        )
+        return redirect("nonlinear_task_detail", pk=task.pk)
+    else:
+        raise Http404("Invalid request method.")
+
+
+class CommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = TaskComment
+    template_name = "nonlinear/confirm_delete.html"
+    context_object_name = "comment"
+
+    def dispatch(self, request, *args, **kwargs):
+        # check user is in the workspace
+        comment = self.get_object()
+        task = comment.task
+        workspace = task.workspace
+
+        if request.user not in workspace.users.all():
+            raise PermissionDenied
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy("nonlinear_task_detail", kwargs={"pk": self.object.task.pk})
+
+    def form_valid(self, form):
+        self.object.is_deleted = True
+        self.object.save()
+        messages.success(self.request, f'Task "{self.object}" has been deleted.')
+        return super().form_valid(form)

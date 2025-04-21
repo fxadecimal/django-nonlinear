@@ -14,7 +14,7 @@
     <div class="row">
         <div class="col-lg-8 mx-auto">
 
-            <article class="card mb-5 shadow">
+            <article class="card mb-2 shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <a href="{% url 'nonlinear_workspace' slug=workspace.slug %}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i>
@@ -43,13 +43,51 @@
                     </dl>
                 </div>
                 <div class="card-body">
-
                     <div>
                         <form method="POST">
                             {% csrf_token %}
                             {{ form | crispy}}
                         </form>
                     </div>
+            </article>
+
+            <article class="card mb-5 shadow" id="comments">
+                <div class="card-header">
+                    <h4>Comments</h4>
+                </div>
+                {% if task.comments.all.count > 0 %}
+                {% for comment in task.comments.all %}
+                <div class="card-body border-bottom" id="comment-{{ comment.pk }}">
+                    <p>{{ comment.text }}</p>
+                    <div class="d-flex justify-content-between">
+                        <small>{{ comment.created_at|naturaltime }}</small>
+                        <div>
+                            <small class="mb-0">{{ comment.created_by|truncatechars:20 }}</small>
+                            <div class="d-inline">
+                                <a href="{% url 'nonlinear_task_comment_delete' comment.pk %}"
+                                    class="btn btn-link btn-sm p-0 ms-2">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+                {% endif %}
+                <div class="card-footer">
+                    <form method="POST" action="{% url 'nonlinear_task_comment' task.pk %}" hx-target="#comments"
+                        hx-post="{% url 'nonlinear_task_comment' task.pk %}" hx-trigger="submit" hx-swap="outerHTML"
+                        hx-select="#comments">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Add a comment</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
             </article>
         </div>
     </div>

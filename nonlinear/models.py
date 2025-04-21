@@ -210,12 +210,16 @@ class UserTask(TimestampedModel):
 
 
 class TaskComment(TimestampedModel):
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_deleted = models.BooleanField(default=False)
     text = models.TextField()
     created_by = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="task_comments"
+        User, on_delete=models.PROTECT, related_name="nonlinear_task_comments"
     )
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
+
+    def __str__(self):
+        return f"Comment: '{self.text[0:20]}..' by {self.created_by}"
 
 
 class Tag(TimestampedModel):

@@ -13,12 +13,12 @@
         <div class="col-lg-6 mx-auto flex-center">
             <article class="card card-body">
                 <h2>{% trans "Confirm Delete" %}</h2>
-                <p>{% trans "Are you sure you want to delete" %} "{{ object }}"?</p>
+                <p>{% trans "Are you sure you want to delete" %} <br /> "{{ object }}"?</p>
 
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
-                    <a href="{{object.get_absolute_url}}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+                    <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-secondary">{% trans "Cancel" %}</a>
                 </form>
             </article>
         </div>
