@@ -76,13 +76,21 @@ class Command(BaseCommand):
 
         workspace_dict = serailize_workspace(workspace_slug=workspace_slug)
 
-        if format == "json":
-            output = json.dumps(workspace_dict, indent=4)
+        if format == "json" or format == "yaml":
 
-        elif format == "yaml":
-            import yaml
+            flattened = []
+            flattened.extend(workspace_dict["workspace"])
+            flattened.extend(workspace_dict["tasks"])
+            flattened.extend(workspace_dict["users"])
+            flattened.extend(workspace_dict["tags"])
+            flattened.extend(workspace_dict["task_comments"])
 
-            output = yaml.dump(workspace_dict, default_flow_style=False)
+            if format == "yaml":
+                import yaml
+
+                output = yaml.dump(flattened, indent=4)
+            else:
+                output = json.dumps(flattened, indent=4)
 
         elif format == "csv":
             tasks = workspace_dict["tasks"]

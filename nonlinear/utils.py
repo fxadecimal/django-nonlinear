@@ -9,6 +9,9 @@ from django.core.serializers import serialize
 
 def serailize_workspace(workspace_slug=None, workspace=None):
 
+    def _dserialize(obj, **options):
+        return json.loads(serialize("json", obj, **options))
+
     if not workspace:
         workspace = Workspace.objects.filter(slug=workspace_slug).first()
 
@@ -21,10 +24,10 @@ def serailize_workspace(workspace_slug=None, workspace=None):
     task_comments = TaskComment.objects.filter(task__workspace=workspace)
 
     data = {
-        "workspace": json.loads(serialize("json", [workspace])),
-        "tasks": json.loads(serialize("json", tasks)),
-        "users": json.loads(serialize("json", users)),
-        "tags": json.loads(serialize("json", tags)),
-        "task_comments": json.loads(serialize("json", task_comments)),
+        "workspace": _dserialize([workspace]),
+        "tasks": _dserialize(tasks),
+        "users": _dserialize(users),
+        "tags": _dserialize(tags),
+        "task_comments": _dserialize(task_comments),
     }
     return data
